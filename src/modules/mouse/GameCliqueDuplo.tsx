@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { WindowFrame } from "@/components/WindowFrame";
 import { formatTime } from "./scoring";
 
-const targetFolder = "Fotos";
 const allFolders = [
-  targetFolder,
+  "Fotos",
   "Música",
   "Documentos",
   "Downloads",
@@ -36,6 +35,14 @@ const allFolders = [
   "Contratos"
 ];
 const levelSizes = { easy: 5, medium: 15, hard: 30 } as const;
+const shuffle = (items: string[]) => {
+  const copy = [...items];
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+};
 
 type GameResult = {
   timeMs: number;
@@ -49,27 +56,32 @@ type GameCliqueDuploProps = {
 
 export const GameCliqueDuplo: React.FC<GameCliqueDuploProps> = ({ onComplete, level }) => {
   const [selected, setSelected] = useState<string | null>(null);
-  const [message, setMessage] = useState("Abra a pasta Fotos com dois cliques.");
+  const [message, setMessage] = useState("Abra todas as pastas com dois cliques.");
+  const [opened, setOpened] = useState<string[]>([]);
   const [errors, setErrors] = useState(0);
   const [start, setStart] = useState(() => Date.now());
   const [done, setDone] = useState(false);
   const [shake, setShake] = useState(false);
+  const completedRef = useRef(false);
 
-  const folders = React.useMemo(() => {
+  const folders = useMemo(() => {
     const size = levelSizes[level];
-    return allFolders.slice(0, size);
+    return shuffle(allFolders).slice(0, size);
   }, [level]);
 
   useEffect(() => {
     setSelected(null);
-    setMessage("Abra a pasta Fotos com dois cliques.");
+    setMessage("Abra todas as pastas com dois cliques.");
+    setOpened([]);
     setErrors(0);
     setStart(Date.now());
     setDone(false);
+    completedRef.current = false;
   }, [level]);
 
   useEffect(() => {
-    if (done) {
+    if (done && !completedRef.current) {
+      completedRef.current = true;
       const timeMs = Date.now() - start;
       onComplete({ timeMs, errors });
     }
@@ -89,25 +101,34 @@ export const GameCliqueDuplo: React.FC<GameCliqueDuploProps> = ({ onComplete, le
   };
 
   const handleDoubleClick = (folder: string) => {
-    if (folder === targetFolder) {
-      setDone(true);
-    } else {
-      setMessage("Essa não é a pasta certa. Procure Fotos.");
+    if (opened.includes(folder)) {
+      setMessage("Essa pasta já foi aberta. Escolha outra.");
       setErrors((prev) => prev + 1);
       triggerShake();
+      return;
+    }
+
+    const updated = [...opened, folder];
+    setOpened(updated);
+    if (updated.length === folders.length) {
+      setDone(true);
+    } else {
+      setMessage(`Boa! Ainda faltam ${folders.length - updated.length} pastas.`);
     }
   };
 
   return (
     <div className="game-area">
       <WindowFrame title="Pastas" className={shake ? "shake" : ""}>
-        <p className="mission">Missão: abra a pasta {targetFolder}.</p>
+        <p className="mission">Missão: abra todas as pastas desta lista.</p>
         <div className="folder-grid">
           {folders.map((folder) => (
             <button
               key={folder}
               type="button"
-              className={`folder-item ${selected === folder ? "selected" : ""}`}
+              className={`folder-item ${selected === folder ? "selected" : ""} ${
+                opened.includes(folder) ? "opened" : ""
+              }`}
               onClick={() => handleClick(folder)}
               onDoubleClick={() => handleDoubleClick(folder)}
             >

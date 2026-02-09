@@ -1,12 +1,11 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/Button";
 import { WindowFrame } from "@/components/WindowFrame";
 import { formatTime } from "./scoring";
 
-const targetFile = "Foto2.png";
 const allFiles = [
-  targetFile,
   "Foto1.png",
+  "Foto2.png",
   "Foto3.png",
   "Foto4.png",
   "Texto.txt",
@@ -37,6 +36,14 @@ const allFiles = [
   "RelatorioFinal.pdf"
 ];
 const levelSizes = { easy: 5, medium: 15, hard: 30 } as const;
+const shuffle = (items: string[]) => {
+  const copy = [...items];
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+};
 
 type GameResult = {
   timeMs: number;
@@ -50,27 +57,31 @@ type GameCliqueSimplesProps = {
 
 export const GameCliqueSimples: React.FC<GameCliqueSimplesProps> = ({ onComplete, level }) => {
   const [selected, setSelected] = useState<string | null>(null);
-  const [message, setMessage] = useState("Selecione Foto2.png com um clique.");
+  const [targets, setTargets] = useState<string[]>([]);
+  const [fileItems, setFileItems] = useState<string[]>([]);
+  const [message, setMessage] = useState("Prepare-se para selecionar arquivos.");
   const [errors, setErrors] = useState(0);
   const [start, setStart] = useState(() => Date.now());
   const [done, setDone] = useState(false);
   const [shake, setShake] = useState(false);
-
-  const fileItems = useMemo(() => {
-    const size = levelSizes[level];
-    return allFiles.slice(0, size);
-  }, [level]);
+  const completedRef = useRef(false);
 
   useEffect(() => {
     setSelected(null);
-    setMessage("Selecione Foto2.png com um clique.");
+    const size = levelSizes[level];
+    const shuffled = shuffle(allFiles).slice(0, size);
+    setTargets(shuffled);
+    setFileItems(shuffled);
+    setMessage(`Selecione ${shuffled[0]} com um clique.`);
     setErrors(0);
     setStart(Date.now());
     setDone(false);
+    completedRef.current = false;
   }, [level]);
 
   useEffect(() => {
-    if (done) {
+    if (done && !completedRef.current) {
+      completedRef.current = true;
       const timeMs = Date.now() - start;
       onComplete({ timeMs, errors });
     }
@@ -86,7 +97,7 @@ export const GameCliqueSimples: React.FC<GameCliqueSimplesProps> = ({ onComplete
 
   const handleClick = (file: string) => {
     setSelected(file);
-    if (file === targetFile) {
+    if (file === targets[0]) {
       setMessage("Ótimo! Agora clique em Abrir.");
     } else {
       setMessage("Esse não é o arquivo. Tente novamente com calma.");
@@ -102,10 +113,17 @@ export const GameCliqueSimples: React.FC<GameCliqueSimplesProps> = ({ onComplete
   };
 
   const handleOpen = () => {
-    if (selected === targetFile) {
-      setDone(true);
+    if (selected === targets[0]) {
+      const nextTargets = targets.slice(1);
+      if (nextTargets.length === 0) {
+        setDone(true);
+      } else {
+        setTargets(nextTargets);
+        setSelected(null);
+        setMessage(`Agora selecione ${nextTargets[0]}.`);
+      }
     } else {
-      setMessage("Selecione Foto2.png antes de abrir.");
+      setMessage("Selecione o arquivo certo antes de abrir.");
       setErrors((prev) => prev + 1);
       triggerShake();
     }
@@ -114,7 +132,7 @@ export const GameCliqueSimples: React.FC<GameCliqueSimplesProps> = ({ onComplete
   return (
     <div className="game-area">
       <WindowFrame title="Explorador de Arquivos" className={shake ? "shake" : ""}>
-        <p className="mission">Missão: selecione {targetFile} e clique em Abrir.</p>
+        <p className="mission">Missão: selecione o arquivo pedido e clique em Abrir.</p>
         <div className="file-list" onDoubleClick={handleDoubleClick}>
           {fileItems.map((file) => (
             <button

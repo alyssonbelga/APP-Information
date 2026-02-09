@@ -132,6 +132,11 @@ body {
   background: #e8f0ff;
 }
 
+.folder-item.opened {
+  border-color: #22c55e;
+  background: #ecfdf3;
+}
+
 .window-actions {
   display: flex;
   justify-content: flex-end;

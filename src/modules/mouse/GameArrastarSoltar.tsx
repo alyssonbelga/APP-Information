@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { WindowFrame } from "@/components/WindowFrame";
 import { formatTime } from "./scoring";
 
@@ -37,6 +37,14 @@ const allItems = [
 
 const folders = ["Imagens", "Documentos", "Vídeos"];
 const levelSizes = { easy: 5, medium: 15, hard: 30 } as const;
+const shuffle = <T,>(items: T[]) => {
+  const copy = [...items];
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+};
 
 type GameResult = {
   timeMs: number;
@@ -51,7 +59,7 @@ type GameArrastarSoltarProps = {
 export const GameArrastarSoltar: React.FC<GameArrastarSoltarProps> = ({ onComplete, level }) => {
   const items = useMemo(() => {
     const size = levelSizes[level];
-    return allItems.slice(0, size);
+    return shuffle(allItems).slice(0, size);
   }, [level]);
   const [placed, setPlaced] = useState<string[]>([]);
   const [message, setMessage] = useState("Arraste cada arquivo para a pasta correta.");
@@ -59,6 +67,7 @@ export const GameArrastarSoltar: React.FC<GameArrastarSoltarProps> = ({ onComple
   const [start, setStart] = useState(() => Date.now());
   const [done, setDone] = useState(false);
   const [shake, setShake] = useState(false);
+  const completedRef = useRef(false);
   const itemsRemaining = useMemo(
     () => items.filter((item) => !placed.includes(item.id)),
     [items, placed]
@@ -70,10 +79,12 @@ export const GameArrastarSoltar: React.FC<GameArrastarSoltarProps> = ({ onComple
     setErrors(0);
     setStart(Date.now());
     setDone(false);
+    completedRef.current = false;
   }, [level]);
 
   useEffect(() => {
-    if (done) {
+    if (done && !completedRef.current) {
+      completedRef.current = true;
       const timeMs = Date.now() - start;
       onComplete({ timeMs, errors });
     }

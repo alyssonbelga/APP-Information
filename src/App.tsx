@@ -207,20 +207,23 @@ const LessonFlowPage: React.FC = () => {
             </span>
           </div>
           <GameComponent
+            key={`${lesson.id}-${levels[levelIndex]}`}
             level={levels[levelIndex]}
             onComplete={async (gameResult) => {
-              const updatedResults = [...levelResults, gameResult];
-              setLevelResults(updatedResults);
-              if (levelIndex < levels.length - 1) {
-                setLevelIndex((prev) => prev + 1);
-                return;
-              }
-              const totalErrors = updatedResults.reduce((sum, entry) => sum + entry.errors, 0);
-              const totalTime = updatedResults.reduce((sum, entry) => sum + entry.timeMs, 0);
-              const stars = calculateStars(totalErrors, totalTime);
-              const summary = { stars, timeMs: totalTime, errors: totalErrors };
-              setResult(summary);
-              await updateLesson(lesson.id, summary.stars, summary.timeMs);
+              setLevelResults((prev) => {
+                const updatedResults = [...prev, gameResult];
+                if (updatedResults.length < levels.length) {
+                  setLevelIndex((prevIndex) => Math.min(prevIndex + 1, levels.length - 1));
+                  return updatedResults;
+                }
+                const totalErrors = updatedResults.reduce((sum, entry) => sum + entry.errors, 0);
+                const totalTime = updatedResults.reduce((sum, entry) => sum + entry.timeMs, 0);
+                const stars = calculateStars(totalErrors, totalTime);
+                const summary = { stars, timeMs: totalTime, errors: totalErrors };
+                setResult(summary);
+                void updateLesson(lesson.id, summary.stars, summary.timeMs);
+                return updatedResults;
+              });
             }}
           />
           {result && (
