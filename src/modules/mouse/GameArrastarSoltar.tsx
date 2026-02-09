@@ -1,40 +1,91 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { WindowFrame } from "@/components/WindowFrame";
-import { calculateStars, formatTime } from "./scoring";
+import { formatTime } from "./scoring";
 
-const items = [
+const allItems = [
   { id: "foto", label: "foto.jpg", target: "Imagens" },
+  { id: "foto2", label: "praia.png", target: "Imagens" },
+  { id: "foto3", label: "familia.png", target: "Imagens" },
+  { id: "foto4", label: "cidade.jpg", target: "Imagens" },
+  { id: "foto5", label: "amigos.jpg", target: "Imagens" },
+  { id: "foto6", label: "evento.png", target: "Imagens" },
+  { id: "foto7", label: "paisagem.jpg", target: "Imagens" },
+  { id: "foto8", label: "animal.png", target: "Imagens" },
+  { id: "foto9", label: "casa.jpg", target: "Imagens" },
+  { id: "foto10", label: "bolo.png", target: "Imagens" },
   { id: "relatorio", label: "relatorio.docx", target: "Documentos" },
-  { id: "video", label: "video.mp4", target: "Vídeos" }
+  { id: "texto1", label: "texto.txt", target: "Documentos" },
+  { id: "planilha", label: "planilha.xlsx", target: "Documentos" },
+  { id: "contrato", label: "contrato.pdf", target: "Documentos" },
+  { id: "recibo", label: "recibo.pdf", target: "Documentos" },
+  { id: "notas", label: "notas.txt", target: "Documentos" },
+  { id: "curriculo", label: "curriculo.docx", target: "Documentos" },
+  { id: "relatorio2", label: "relatorio2.docx", target: "Documentos" },
+  { id: "lista", label: "lista.docx", target: "Documentos" },
+  { id: "orcamento", label: "orcamento.xlsx", target: "Documentos" },
+  { id: "video", label: "video.mp4", target: "Vídeos" },
+  { id: "video2", label: "aula.mp4", target: "Vídeos" },
+  { id: "video3", label: "familia.mp4", target: "Vídeos" },
+  { id: "video4", label: "filme.mp4", target: "Vídeos" },
+  { id: "video5", label: "evento.mp4", target: "Vídeos" },
+  { id: "video6", label: "viagem.mp4", target: "Vídeos" },
+  { id: "video7", label: "treino.mp4", target: "Vídeos" },
+  { id: "video8", label: "aniversario.mp4", target: "Vídeos" },
+  { id: "video9", label: "tutorial.mp4", target: "Vídeos" },
+  { id: "video10", label: "show.mp4", target: "Vídeos" }
 ];
 
 const folders = ["Imagens", "Documentos", "Vídeos"];
+const levelSizes = { easy: 5, medium: 15, hard: 30 } as const;
 
 type GameResult = {
-  stars: number;
   timeMs: number;
   errors: number;
 };
 
 type GameArrastarSoltarProps = {
   onComplete: (result: GameResult) => void;
+  level: "easy" | "medium" | "hard";
 };
 
-export const GameArrastarSoltar: React.FC<GameArrastarSoltarProps> = ({ onComplete }) => {
+export const GameArrastarSoltar: React.FC<GameArrastarSoltarProps> = ({ onComplete, level }) => {
+  const items = useMemo(() => {
+    const size = levelSizes[level];
+    return allItems.slice(0, size);
+  }, [level]);
   const [placed, setPlaced] = useState<string[]>([]);
   const [message, setMessage] = useState("Arraste cada arquivo para a pasta correta.");
   const [errors, setErrors] = useState(0);
-  const [start] = useState(() => Date.now());
+  const [start, setStart] = useState(() => Date.now());
   const [done, setDone] = useState(false);
-  const itemsRemaining = useMemo(() => items.filter((item) => !placed.includes(item.id)), [placed]);
+  const [shake, setShake] = useState(false);
+  const itemsRemaining = useMemo(
+    () => items.filter((item) => !placed.includes(item.id)),
+    [items, placed]
+  );
+
+  useEffect(() => {
+    setPlaced([]);
+    setMessage("Arraste cada arquivo para a pasta correta.");
+    setErrors(0);
+    setStart(Date.now());
+    setDone(false);
+  }, [level]);
 
   useEffect(() => {
     if (done) {
       const timeMs = Date.now() - start;
-      const stars = calculateStars(errors, timeMs);
-      onComplete({ stars, timeMs, errors });
+      onComplete({ timeMs, errors });
     }
   }, [done, errors, onComplete, start]);
+
+  useEffect(() => {
+    if (!shake) return;
+    const timeout = setTimeout(() => setShake(false), 250);
+    return () => clearTimeout(timeout);
+  }, [shake]);
+
+  const triggerShake = () => setShake(true);
 
   const handleDrop = (folder: string, itemId: string) => {
     const item = items.find((entry) => entry.id === itemId);
@@ -49,12 +100,13 @@ export const GameArrastarSoltar: React.FC<GameArrastarSoltarProps> = ({ onComple
     } else {
       setMessage("Essa pasta não é a correta. Tente de novo com calma.");
       setErrors((prev) => prev + 1);
+      triggerShake();
     }
   };
 
   return (
     <div className="game-area">
-      <WindowFrame title="Área de Trabalho">
+      <WindowFrame title="Área de Trabalho" className={shake ? "shake" : ""}>
         <p className="mission">Missão: organize os arquivos nas pastas certas.</p>
         <div className="drag-layout">
           <div className="drag-items">

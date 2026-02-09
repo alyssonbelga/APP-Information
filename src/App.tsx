@@ -6,6 +6,7 @@ import { ProgressStars } from "@/components/ProgressStars";
 import { Toggle } from "@/components/Toggle";
 import { useProgress } from "@/store/progress";
 import { lessonSteps, mouseLessons } from "@/modules/mouse/lessons";
+import { calculateStars, formatTime } from "@/modules/mouse/scoring";
 import { GameCliqueSimples } from "@/modules/mouse/GameCliqueSimples";
 import { GameCliqueDuplo } from "@/modules/mouse/GameCliqueDuplo";
 import { GameArrastarSoltar } from "@/modules/mouse/GameArrastarSoltar";
@@ -120,9 +121,20 @@ const LessonFlowPage: React.FC = () => {
   const lesson = mouseLessons.find((entry) => entry.id === lessonId);
   const currentStep = step as (typeof lessonSteps)[number];
   const stepIndex = lessonSteps.indexOf(currentStep);
-  const [result, setResult] = React.useState<null | { stars: number; timeMs: number; errors: number }>(
-    null
-  );
+  const levels = ["easy", "medium", "hard"] as const;
+  const [levelIndex, setLevelIndex] = React.useState(0);
+  const [levelResults, setLevelResults] = React.useState<
+    { timeMs: number; errors: number }[]
+  >([]);
+  const [result, setResult] = React.useState<
+    null | { stars: number; timeMs: number; errors: number }
+  >(null);
+
+  React.useEffect(() => {
+    setLevelIndex(0);
+    setLevelResults([]);
+    setResult(null);
+  }, [lessonId, step]);
 
   if (!lesson || !currentStep) {
     return (
@@ -156,6 +168,12 @@ const LessonFlowPage: React.FC = () => {
     </ul>
   );
 
+  const levelLabel = {
+    easy: "Fácil (5 itens)",
+    medium: "Médio (15 itens)",
+    hard: "Difícil (30 itens)"
+  } as const;
+
   return (
     <div className="page">
       <header className="lesson-header">
@@ -182,10 +200,27 @@ const LessonFlowPage: React.FC = () => {
 
       {currentStep === "game" && (
         <Card title="Jogo">
+          <div className="level-header">
+            <strong>Nível: {levelLabel[levels[levelIndex]]}</strong>
+            <span>
+              Etapa {levelIndex + 1} de {levels.length}
+            </span>
+          </div>
           <GameComponent
+            level={levels[levelIndex]}
             onComplete={async (gameResult) => {
-              setResult(gameResult);
-              await updateLesson(lesson.id, gameResult.stars, gameResult.timeMs);
+              const updatedResults = [...levelResults, gameResult];
+              setLevelResults(updatedResults);
+              if (levelIndex < levels.length - 1) {
+                setLevelIndex((prev) => prev + 1);
+                return;
+              }
+              const totalErrors = updatedResults.reduce((sum, entry) => sum + entry.errors, 0);
+              const totalTime = updatedResults.reduce((sum, entry) => sum + entry.timeMs, 0);
+              const stars = calculateStars(totalErrors, totalTime);
+              const summary = { stars, timeMs: totalTime, errors: totalErrors };
+              setResult(summary);
+              await updateLesson(lesson.id, summary.stars, summary.timeMs);
             }}
           />
           {result && (
@@ -193,6 +228,7 @@ const LessonFlowPage: React.FC = () => {
               <h3>Parabéns!</h3>
               <p>Você ganhou {result.stars} estrelas.</p>
               <p>Erros: {result.errors}</p>
+              <p>Tempo total: {formatTime(result.timeMs)}</p>
               <Button onClick={goNext}>Continuar para Fixação</Button>
             </div>
           )}

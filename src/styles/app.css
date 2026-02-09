@@ -76,6 +76,17 @@ body {
   gap: 16px;
 }
 
+.level-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #f5f7ff;
+  border: 1px solid #d8e0f0;
+}
+
 .text-list {
   list-style: none;
   padding-left: 0;
@@ -165,4 +176,26 @@ body {
   align-items: center;
   gap: 12px;
   font-weight: 600;
+}
+
+.shake {
+  animation: shake 0.25s ease-in-out;
+}
+
+@keyframes shake {
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-6px);
+  }
+  50% {
+    transform: translateX(6px);
+  }
+  75% {
+    transform: translateX(-4px);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
