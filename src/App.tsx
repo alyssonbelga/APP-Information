@@ -129,11 +129,13 @@ const LessonFlowPage: React.FC = () => {
   const [result, setResult] = React.useState<
     null | { stars: number; timeMs: number; errors: number }
   >(null);
+  const [taskRequest, setTaskRequest] = React.useState("");
 
   React.useEffect(() => {
     setLevelIndex(0);
     setLevelResults([]);
     setResult(null);
+    setTaskRequest("");
   }, [lessonId, step]);
 
   if (!lesson || !currentStep) {
@@ -200,6 +202,10 @@ const LessonFlowPage: React.FC = () => {
 
       {currentStep === "game" && (
         <Card title="Jogo">
+          <div className="task-request">
+            <strong>Solicitação da tarefa:</strong>
+            <span>{taskRequest || "Carregando instruções..."}</span>
+          </div>
           <div className="level-header">
             <strong>Nível: {levelLabel[levels[levelIndex]]}</strong>
             <span>
@@ -209,6 +215,7 @@ const LessonFlowPage: React.FC = () => {
           <GameComponent
             key={`${lesson.id}-${levels[levelIndex]}`}
             level={levels[levelIndex]}
+            onRequestChange={setTaskRequest}
             onComplete={async (gameResult) => {
               setLevelResults((prev) => {
                 const updatedResults = [...prev, gameResult];

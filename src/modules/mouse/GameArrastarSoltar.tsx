@@ -54,9 +54,14 @@ type GameResult = {
 type GameArrastarSoltarProps = {
   onComplete: (result: GameResult) => void;
   level: "easy" | "medium" | "hard";
+  onRequestChange: (request: string) => void;
 };
 
-export const GameArrastarSoltar: React.FC<GameArrastarSoltarProps> = ({ onComplete, level }) => {
+export const GameArrastarSoltar: React.FC<GameArrastarSoltarProps> = ({
+  onComplete,
+  level,
+  onRequestChange
+}) => {
   const items = useMemo(() => {
     const size = levelSizes[level];
     return shuffle(allItems).slice(0, size);
@@ -76,11 +81,12 @@ export const GameArrastarSoltar: React.FC<GameArrastarSoltarProps> = ({ onComple
   useEffect(() => {
     setPlaced([]);
     setMessage("Arraste cada arquivo para a pasta correta.");
+    onRequestChange("Arraste cada arquivo para a pasta correta.");
     setErrors(0);
     setStart(Date.now());
     setDone(false);
     completedRef.current = false;
-  }, [level]);
+  }, [level, onRequestChange]);
 
   useEffect(() => {
     if (done && !completedRef.current) {

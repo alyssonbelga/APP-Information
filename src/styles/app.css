@@ -87,6 +87,16 @@ body {
   border: 1px solid #d8e0f0;
 }
 
+.task-request {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  font-weight: 600;
+}
+
 .text-list {
   list-style: none;
   padding-left: 0;

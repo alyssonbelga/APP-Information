@@ -52,9 +52,14 @@ type GameResult = {
 type GameCliqueDuploProps = {
   onComplete: (result: GameResult) => void;
   level: "easy" | "medium" | "hard";
+  onRequestChange: (request: string) => void;
 };
 
-export const GameCliqueDuplo: React.FC<GameCliqueDuploProps> = ({ onComplete, level }) => {
+export const GameCliqueDuplo: React.FC<GameCliqueDuploProps> = ({
+  onComplete,
+  level,
+  onRequestChange
+}) => {
   const [selected, setSelected] = useState<string | null>(null);
   const [message, setMessage] = useState("Abra todas as pastas com dois cliques.");
   const [opened, setOpened] = useState<string[]>([]);
@@ -73,11 +78,12 @@ export const GameCliqueDuplo: React.FC<GameCliqueDuploProps> = ({ onComplete, le
     setSelected(null);
     setMessage("Abra todas as pastas com dois cliques.");
     setOpened([]);
+    onRequestChange("Abra todas as pastas da lista usando dois cliques.");
     setErrors(0);
     setStart(Date.now());
     setDone(false);
     completedRef.current = false;
-  }, [level]);
+  }, [level, onRequestChange]);
 
   useEffect(() => {
     if (done && !completedRef.current) {

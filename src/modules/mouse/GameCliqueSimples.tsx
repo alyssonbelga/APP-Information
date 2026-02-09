@@ -53,9 +53,14 @@ type GameResult = {
 type GameCliqueSimplesProps = {
   onComplete: (result: GameResult) => void;
   level: "easy" | "medium" | "hard";
+  onRequestChange: (request: string) => void;
 };
 
-export const GameCliqueSimples: React.FC<GameCliqueSimplesProps> = ({ onComplete, level }) => {
+export const GameCliqueSimples: React.FC<GameCliqueSimplesProps> = ({
+  onComplete,
+  level,
+  onRequestChange
+}) => {
   const [selected, setSelected] = useState<string | null>(null);
   const [targets, setTargets] = useState<string[]>([]);
   const [fileItems, setFileItems] = useState<string[]>([]);
@@ -74,11 +79,12 @@ export const GameCliqueSimples: React.FC<GameCliqueSimplesProps> = ({ onComplete
     setTargets(targetOrder);
     setFileItems(shuffled);
     setMessage(`Selecione ${targetOrder[0]} com um clique.`);
+    onRequestChange(`Selecione ${targetOrder[0]} e clique em Abrir.`);
     setErrors(0);
     setStart(Date.now());
     setDone(false);
     completedRef.current = false;
-  }, [level]);
+  }, [level, onRequestChange]);
 
   useEffect(() => {
     if (done && !completedRef.current) {
@@ -122,6 +128,7 @@ export const GameCliqueSimples: React.FC<GameCliqueSimplesProps> = ({ onComplete
         setTargets(nextTargets);
         setSelected(null);
         setMessage(`Agora selecione ${nextTargets[0]}.`);
+        onRequestChange(`Selecione ${nextTargets[0]} e clique em Abrir.`);
       }
     } else {
       setMessage("Selecione o arquivo certo antes de abrir.");
