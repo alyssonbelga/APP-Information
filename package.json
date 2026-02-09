@@ -1,0 +1,55 @@
+{
+  "name": "app-information",
+  "version": "0.1.0",
+  "private": true,
+  "main": "apps/desktop/dist/main.js",
+  "author": "",
+  "description": "App desktop offline para ensinar informática básica",
+  "scripts": {
+    "dev": "cross-env VITE_DEV_SERVER_URL=http://localhost:5173 concurrently -k \"npm:dev:main\" \"npm:dev:renderer\" \"wait-on http://localhost:5173 && electron .\"",
+    "dev:main": "tsc -p apps/desktop -w",
+    "dev:renderer": "vite",
+    "build": "npm run build:main && npm run build:renderer && electron-builder",
+    "build:main": "tsc -p apps/desktop",
+    "build:renderer": "vite build",
+    "lint": "echo 'no lint configured'"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
+    "@types/node": "^22.5.4",
+    "@vitejs/plugin-react": "^4.3.1",
+    "concurrently": "^9.0.1",
+    "cross-env": "^7.0.3",
+    "electron": "^31.3.1",
+    "electron-builder": "^24.13.3",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.2",
+    "wait-on": "^7.0.1"
+  },
+  "build": {
+    "appId": "com.appinformation.desktop",
+    "productName": "Aprenda Info",
+    "files": [
+      "dist/**",
+      "apps/desktop/dist/**",
+      "public/assets/**",
+      "package.json"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}

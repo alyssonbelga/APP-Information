@@ -1,0 +1,242 @@
+:root {
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 18px;
+  color: #1b1f24;
+  background: #f0f3f8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f0f3f8;
+}
+
+.app-shell {
+  min-height: 100vh;
+  padding: 32px;
+}
+
+.app-shell.text-large {
+  font-size: 1.2rem;
+}
+
+.app-shell.cursor-large .game-area {
+  cursor: url("/assets/icons/cursor-large.svg") 12 0, pointer;
+}
+
+.game-area {
+  cursor: url("/assets/icons/cursor.svg") 8 0, pointer;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+
+.settings {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.home-actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.module-grid,
+.lesson-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.progress-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.lesson-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.level-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #f5f7ff;
+  border: 1px solid #d8e0f0;
+}
+
+.task-request {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  font-weight: 600;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 50;
+}
+
+.modal {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  width: min(480px, 90vw);
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.3);
+  display: grid;
+  gap: 16px;
+}
+
+.modal-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.text-list {
+  list-style: none;
+  padding-left: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.result-box {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #e8f5ff;
+  border: 2px solid #b5dbff;
+}
+
+.mission {
+  font-weight: 600;
+}
+
+.file-list,
+.folder-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.file-item,
+.folder-item {
+  padding: 12px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.file-item.selected,
+.folder-item.selected {
+  border-color: #4c87ff;
+  background: #e8f0ff;
+}
+
+.folder-item.opened {
+  border-color: #22c55e;
+  background: #ecfdf3;
+}
+
+.window-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.feedback {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.drag-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.drag-items,
+.drop-zones {
+  display: grid;
+  gap: 12px;
+}
+
+.drag-item {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 2px solid #dce4f1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.drop-zone {
+  padding: 18px;
+  border-radius: 12px;
+  background: #f7f9fc;
+  border: 2px dashed #8aa9d6;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+}
+
+.shake {
+  animation: shake 0.25s ease-in-out;
+}
+
+@keyframes shake {
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-6px);
+  }
+  50% {
+    transform: translateX(6px);
+  }
+  75% {
+    transform: translateX(-4px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
