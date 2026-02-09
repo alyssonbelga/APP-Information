@@ -169,9 +169,9 @@ const LessonFlowPage: React.FC = () => {
   );
 
   const levelLabel = {
-    easy: "Fácil (5 itens)",
-    medium: "Médio (15 itens)",
-    hard: "Difícil (30 itens)"
+    easy: "Fácil (4 itens)",
+    medium: "Médio (8 itens)",
+    hard: "Difícil (16 itens)"
   } as const;
 
   return (

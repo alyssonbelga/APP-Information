@@ -34,7 +34,7 @@ const allFolders = [
   "Relatorios",
   "Contratos"
 ];
-const levelSizes = { easy: 5, medium: 15, hard: 30 } as const;
+const levelSizes = { easy: 4, medium: 8, hard: 16 } as const;
 const shuffle = (items: string[]) => {
   const copy = [...items];
   for (let i = copy.length - 1; i > 0; i -= 1) {

@@ -36,7 +36,7 @@ const allItems = [
 ];
 
 const folders = ["Imagens", "Documentos", "Vídeos"];
-const levelSizes = { easy: 5, medium: 15, hard: 30 } as const;
+const levelSizes = { easy: 4, medium: 8, hard: 16 } as const;
 const shuffle = <T,>(items: T[]) => {
   const copy = [...items];
   for (let i = copy.length - 1; i > 0; i -= 1) {

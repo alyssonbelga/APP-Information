@@ -35,7 +35,7 @@ const allFiles = [
   "Caderno.pdf",
   "RelatorioFinal.pdf"
 ];
-const levelSizes = { easy: 5, medium: 15, hard: 30 } as const;
+const levelSizes = { easy: 4, medium: 8, hard: 16 } as const;
 const shuffle = (items: string[]) => {
   const copy = [...items];
   for (let i = copy.length - 1; i > 0; i -= 1) {
@@ -70,9 +70,10 @@ export const GameCliqueSimples: React.FC<GameCliqueSimplesProps> = ({ onComplete
     setSelected(null);
     const size = levelSizes[level];
     const shuffled = shuffle(allFiles).slice(0, size);
-    setTargets(shuffled);
+    const targetOrder = shuffle(shuffled);
+    setTargets(targetOrder);
     setFileItems(shuffled);
-    setMessage(`Selecione ${shuffled[0]} com um clique.`);
+    setMessage(`Selecione ${targetOrder[0]} com um clique.`);
     setErrors(0);
     setStart(Date.now());
     setDone(false);
