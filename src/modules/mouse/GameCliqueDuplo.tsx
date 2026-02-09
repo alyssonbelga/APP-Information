@@ -47,6 +47,8 @@ const shuffle = (items: string[]) => {
 type GameResult = {
   timeMs: number;
   errors: number;
+  hits: number;
+  total: number;
 };
 
 type GameCliqueDuploProps = {
@@ -65,6 +67,7 @@ export const GameCliqueDuplo: React.FC<GameCliqueDuploProps> = ({
   const [opened, setOpened] = useState<string[]>([]);
   const [errors, setErrors] = useState(0);
   const [start, setStart] = useState(() => Date.now());
+  const [elapsedMs, setElapsedMs] = useState(0);
   const [done, setDone] = useState(false);
   const [shake, setShake] = useState(false);
   const completedRef = useRef(false);
@@ -81,6 +84,7 @@ export const GameCliqueDuplo: React.FC<GameCliqueDuploProps> = ({
     onRequestChange("Abra todas as pastas da lista usando dois cliques.");
     setErrors(0);
     setStart(Date.now());
+    setElapsedMs(0);
     setDone(false);
     completedRef.current = false;
   }, [level, onRequestChange]);
@@ -89,9 +93,16 @@ export const GameCliqueDuplo: React.FC<GameCliqueDuploProps> = ({
     if (done && !completedRef.current) {
       completedRef.current = true;
       const timeMs = Date.now() - start;
-      onComplete({ timeMs, errors });
+      onComplete({ timeMs, errors, hits: folders.length, total: folders.length });
     }
-  }, [done, errors, onComplete, start]);
+  }, [done, errors, folders.length, onComplete, start]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setElapsedMs(Date.now() - start);
+    }, 200);
+    return () => clearInterval(interval);
+  }, [start]);
 
   useEffect(() => {
     if (!shake) return;
@@ -147,7 +158,7 @@ export const GameCliqueDuplo: React.FC<GameCliqueDuploProps> = ({
       <div className="feedback">
         <strong>{message}</strong>
         <span>Erros: {errors}</span>
-        <span>Tempo: {formatTime(Date.now() - start)}</span>
+        <span>Tempo: {formatTime(elapsedMs)}</span>
       </div>
     </div>
   );

@@ -124,18 +124,26 @@ const LessonFlowPage: React.FC = () => {
   const levels = ["easy", "medium", "hard"] as const;
   const [levelIndex, setLevelIndex] = React.useState(0);
   const [levelResults, setLevelResults] = React.useState<
-    { timeMs: number; errors: number }[]
+    { timeMs: number; errors: number; hits: number; total: number; stars: number }[]
   >([]);
   const [result, setResult] = React.useState<
     null | { stars: number; timeMs: number; errors: number }
   >(null);
   const [taskRequest, setTaskRequest] = React.useState("");
+  const [stageResult, setStageResult] = React.useState<null | {
+    timeMs: number;
+    errors: number;
+    hits: number;
+    total: number;
+    stars: number;
+  }>(null);
 
   React.useEffect(() => {
     setLevelIndex(0);
     setLevelResults([]);
     setResult(null);
     setTaskRequest("");
+    setStageResult(null);
   }, [lessonId, step]);
 
   if (!lesson || !currentStep) {
@@ -217,32 +225,60 @@ const LessonFlowPage: React.FC = () => {
             level={levels[levelIndex]}
             onRequestChange={setTaskRequest}
             onComplete={async (gameResult) => {
-              setLevelResults((prev) => {
-                const updatedResults = [...prev, gameResult];
-                if (updatedResults.length < levels.length) {
-                  setLevelIndex((prevIndex) => Math.min(prevIndex + 1, levels.length - 1));
-                  return updatedResults;
-                }
-                const totalErrors = updatedResults.reduce((sum, entry) => sum + entry.errors, 0);
-                const totalTime = updatedResults.reduce((sum, entry) => sum + entry.timeMs, 0);
-                const stars = calculateStars(totalErrors, totalTime);
-                const summary = { stars, timeMs: totalTime, errors: totalErrors };
-                setResult(summary);
-                void updateLesson(lesson.id, summary.stars, summary.timeMs);
-                return updatedResults;
-              });
+              const stars = calculateStars(gameResult.errors, gameResult.timeMs);
+              setStageResult({ ...gameResult, stars });
             }}
           />
-          {result && (
-            <div className="result-box">
-              <h3>Parabéns!</h3>
-              <p>Você ganhou {result.stars} estrelas.</p>
-              <p>Erros: {result.errors}</p>
-              <p>Tempo total: {formatTime(result.timeMs)}</p>
-              <Button onClick={goNext}>Continuar para Fixação</Button>
-            </div>
-          )}
         </Card>
+      )}
+
+      {stageResult && (
+        <div className="modal-backdrop">
+          <div className="modal">
+            <h3>Etapa concluída!</h3>
+            <div className="modal-grid">
+              <div>
+                <strong>Acertos:</strong> {stageResult.hits} de {stageResult.total}
+              </div>
+              <div>
+                <strong>Erros:</strong> {stageResult.errors}
+              </div>
+              <div>
+                <strong>Tempo:</strong> {formatTime(stageResult.timeMs)}
+              </div>
+              <div>
+                <strong>Nota:</strong> {stageResult.stars} estrelas
+              </div>
+            </div>
+            <Button
+              onClick={async () => {
+                setLevelResults((prev) => {
+                  const updatedResults = [...prev, stageResult];
+                  if (levelIndex === levels.length - 1) {
+                    const totalErrors = updatedResults.reduce(
+                      (sum, entry) => sum + entry.errors,
+                      0
+                    );
+                    const totalTime = updatedResults.reduce((sum, entry) => sum + entry.timeMs, 0);
+                    const stars = calculateStars(totalErrors, totalTime);
+                    const summary = { stars, timeMs: totalTime, errors: totalErrors };
+                    setResult(summary);
+                    void updateLesson(lesson.id, summary.stars, summary.timeMs);
+                  }
+                  return updatedResults;
+                });
+                setStageResult(null);
+                if (levelIndex < levels.length - 1) {
+                  setLevelIndex((prevIndex) => prevIndex + 1);
+                  return;
+                }
+                goNext();
+              }}
+            >
+              Continuar
+            </Button>
+          </div>
+        </div>
       )}
 
       {currentStep === "fixacao" && (

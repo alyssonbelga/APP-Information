@@ -48,6 +48,8 @@ const shuffle = (items: string[]) => {
 type GameResult = {
   timeMs: number;
   errors: number;
+  hits: number;
+  total: number;
 };
 
 type GameCliqueSimplesProps = {
@@ -67,8 +69,10 @@ export const GameCliqueSimples: React.FC<GameCliqueSimplesProps> = ({
   const [message, setMessage] = useState("Prepare-se para selecionar arquivos.");
   const [errors, setErrors] = useState(0);
   const [start, setStart] = useState(() => Date.now());
+  const [elapsedMs, setElapsedMs] = useState(0);
   const [done, setDone] = useState(false);
   const [shake, setShake] = useState(false);
+  const [totalTargets, setTotalTargets] = useState(0);
   const completedRef = useRef(false);
 
   useEffect(() => {
@@ -78,10 +82,12 @@ export const GameCliqueSimples: React.FC<GameCliqueSimplesProps> = ({
     const targetOrder = shuffle(shuffled);
     setTargets(targetOrder);
     setFileItems(shuffled);
+    setTotalTargets(targetOrder.length);
     setMessage(`Selecione ${targetOrder[0]} com um clique.`);
     onRequestChange(`Selecione ${targetOrder[0]} e clique em Abrir.`);
     setErrors(0);
     setStart(Date.now());
+    setElapsedMs(0);
     setDone(false);
     completedRef.current = false;
   }, [level, onRequestChange]);
@@ -90,9 +96,16 @@ export const GameCliqueSimples: React.FC<GameCliqueSimplesProps> = ({
     if (done && !completedRef.current) {
       completedRef.current = true;
       const timeMs = Date.now() - start;
-      onComplete({ timeMs, errors });
+      onComplete({ timeMs, errors, hits: totalTargets, total: totalTargets });
     }
-  }, [done, errors, onComplete, start]);
+  }, [done, errors, onComplete, start, totalTargets]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setElapsedMs(Date.now() - start);
+    }, 200);
+    return () => clearInterval(interval);
+  }, [start]);
 
   useEffect(() => {
     if (!shake) return;
@@ -161,7 +174,7 @@ export const GameCliqueSimples: React.FC<GameCliqueSimplesProps> = ({
       <div className="feedback">
         <strong>{message}</strong>
         <span>Erros: {errors}</span>
-        <span>Tempo: {formatTime(Date.now() - start)}</span>
+        <span>Tempo: {formatTime(elapsedMs)}</span>
       </div>
     </div>
   );

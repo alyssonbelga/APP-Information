@@ -49,6 +49,8 @@ const shuffle = <T,>(items: T[]) => {
 type GameResult = {
   timeMs: number;
   errors: number;
+  hits: number;
+  total: number;
 };
 
 type GameArrastarSoltarProps = {
@@ -70,6 +72,7 @@ export const GameArrastarSoltar: React.FC<GameArrastarSoltarProps> = ({
   const [message, setMessage] = useState("Arraste cada arquivo para a pasta correta.");
   const [errors, setErrors] = useState(0);
   const [start, setStart] = useState(() => Date.now());
+  const [elapsedMs, setElapsedMs] = useState(0);
   const [done, setDone] = useState(false);
   const [shake, setShake] = useState(false);
   const completedRef = useRef(false);
@@ -84,6 +87,7 @@ export const GameArrastarSoltar: React.FC<GameArrastarSoltarProps> = ({
     onRequestChange("Arraste cada arquivo para a pasta correta.");
     setErrors(0);
     setStart(Date.now());
+    setElapsedMs(0);
     setDone(false);
     completedRef.current = false;
   }, [level, onRequestChange]);
@@ -92,9 +96,16 @@ export const GameArrastarSoltar: React.FC<GameArrastarSoltarProps> = ({
     if (done && !completedRef.current) {
       completedRef.current = true;
       const timeMs = Date.now() - start;
-      onComplete({ timeMs, errors });
+      onComplete({ timeMs, errors, hits: items.length, total: items.length });
     }
-  }, [done, errors, onComplete, start]);
+  }, [done, errors, items.length, onComplete, start]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setElapsedMs(Date.now() - start);
+    }, 200);
+    return () => clearInterval(interval);
+  }, [start]);
 
   useEffect(() => {
     if (!shake) return;
@@ -161,7 +172,7 @@ export const GameArrastarSoltar: React.FC<GameArrastarSoltarProps> = ({
       <div className="feedback">
         <strong>{message}</strong>
         <span>Erros: {errors}</span>
-        <span>Tempo: {formatTime(Date.now() - start)}</span>
+        <span>Tempo: {formatTime(elapsedMs)}</span>
       </div>
     </div>
   );
